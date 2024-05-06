@@ -1,0 +1,40 @@
+name: Deployment
+on:
+  push:
+    branches:
+      - master
+      - dev
+env:
+  PORT: 3000
+  MONGODB_DB_NAME: atour_test_db
+jobs:
+  test:
+    env:
+      MONGODB_CLUSTER_ADDRESS: cluster0.mhymgls.mongodb.net
+      MONGODB_USERNAME: atour
+      MONGODB_PASSWORD: ZH!j_ND8_h3$Ckn
+    environment: testing
+    runs-on: ubuntu-latest
+    steps:
+      - name: Get Code
+        uses: actions/checkout@v4
+      - name: Cache dependencies
+        uses: actions/cache@v4
+        with:
+          path: ~/.npm
+          key: npm-deps-${{ hashFiles('**/package-lock.json') }}
+      - name: Install dependencies
+        run: npm ci
+      - name: Run server
+        run: npm start & npx wait-on http://127.0.0.1:${{env.PORT}}
+      - name: Run tests
+        run: npm test
+      - name: Output information
+        run: echo "..."
+  deploy:
+    needs: test
+    runs-on: ubuntu-latest
+    steps:
+      - name: Output information
+        run: |        
+          echo "..."
